@@ -6,7 +6,6 @@ const app = express()
 const PORT = 3000;
 
 // MIDDLEWARES
-// In Progress...
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static('public'))
@@ -18,20 +17,21 @@ app.get('/api/notes', (req,res) => {
 })
 
 app.post('/api/notes', (req,res) => {
-  let savedNotes = JSON.parse(fs.readFileSync(`${__dirname}/db/db.json`, "utf8"));
+  let allNotes = JSON.parse(fs.readFileSync(`${__dirname}/db/db.json`, "utf8"));
   let newNote = req.body;
   const uniqueID = uuid.v4();
   newNote.id = uniqueID;
-  savedNotes.push(newNote);
-
-  fs.writeFileSync(`${__dirname}/db/db.json`, JSON.stringify(savedNotes));
-  res.json(savedNotes);
+  allNotes.push(newNote);
+  fs.writeFileSync(`${__dirname}/db/db.json`, JSON.stringify(allNotes));
+  res.json(allNotes);
 })
 
-app.delete('/api/notes', (req,res) => {
-  const newNote = req.body
-
-  res.json()
+app.delete("/api/notes/:id", function(req, res) {
+  let allNotes = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
+  let noteID = req.params.id;
+  allNotes = allNotes.filter(currNote => currNote.id != noteID)
+  fs.writeFileSync("./db/db.json", JSON.stringify(allNotes));
+  res.json(allNotes)
 })
 
 // HTML Routes
