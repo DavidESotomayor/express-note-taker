@@ -1,5 +1,5 @@
-
 const fs = require('fs')
+const uuid = require('uuid')
 const express = require('express')
 const path = require('path')
 const app = express()
@@ -11,16 +11,6 @@ const PORT = 3000;
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(express.static('public'))
-
-// HTML Routes
-app.get('/notes', (req, res) => {
-  res.sendFile( path.join(`${__dirname}/public/notes.html`) )
-})
-
-app.get('*', (req,res) => {
-  res.sendFile( path.join(`${__dirname}/public/index.html`))
-})
-
 
 //API Routes
 app.get('/api/notes', (req,res) => {
@@ -34,14 +24,32 @@ app.get('/api/notes', (req,res) => {
 
 app.post('/api/notes', (req,res) => {
   const newNote = req.body
-  console.log(newNote);
-  res.json(newNote)
+  const id = uuid.v4();
+  const data = {...newNote, id};
+  try {
+    fs.appendFile(`${__dirname}/db/db.json` , JSON.stringify(data), (err) => {
+      if (err) throw err;
+      console.log('The "data to append" was appended to file!');
+    });
+    res.json(data);
+  } catch (error) {
+    res.json(error).status(400)
+  }
 })
 
 app.delete('/api/notes', (req,res) => {
   const newNote = req.body
 
   res.json()
+})
+
+// HTML Routes
+app.get('/notes', (req, res) => {
+  res.sendFile( path.join(`${__dirname}/public/notes.html`) )
+})
+
+app.get('*', (req,res) => {
+  res.sendFile( path.join(`${__dirname}/public/index.html`))
 })
 
 app.listen(PORT, () => {
