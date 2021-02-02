@@ -29,7 +29,7 @@ app.post('/api/notes', (req,res) => {
 app.delete("/api/notes/:id", function(req, res) {
   let allNotes = JSON.parse(fs.readFileSync("./db/db.json", "utf8"));
   let noteID = req.params.id;
-  allNotes = allNotes.filter(currNote => currNote.id != noteID)
+  allNotes = allNotes.filter(currentId => currentId.id != noteID)
   fs.writeFileSync("./db/db.json", JSON.stringify(allNotes));
   res.json(allNotes)
 })
