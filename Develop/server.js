@@ -5,7 +5,6 @@ const path = require('path')
 const app = express()
 const PORT = 3000;
 
-
 // MIDDLEWARES
 // In Progress...
 app.use(express.urlencoded({ extended: true }))
@@ -14,27 +13,19 @@ app.use(express.static('public'))
 
 //API Routes
 app.get('/api/notes', (req,res) => {
-  const notes = fs.readFile(`${__dirname}/db/db.json`,(err, data) => {
-    if (err) throw err;
-    console.log(data);
-    return data;
-  })
-  res.json(notes)
+  const rawData = fs.readFileSync(`${__dirname}/db/db.json`)
+  res.json(JSON.parse(rawData))
 })
 
 app.post('/api/notes', (req,res) => {
-  const newNote = req.body
-  const id = uuid.v4();
-  const data = {...newNote, id};
-  try {
-    fs.appendFile(`${__dirname}/db/db.json` , JSON.stringify(data), (err) => {
-      if (err) throw err;
-      console.log('The "data to append" was appended to file!');
-    });
-    res.json(data);
-  } catch (error) {
-    res.json(error).status(400)
-  }
+  let savedNotes = JSON.parse(fs.readFileSync(`${__dirname}/db/db.json`, "utf8"));
+  let newNote = req.body;
+  const uniqueID = uuid.v4();
+  newNote.id = uniqueID;
+  savedNotes.push(newNote);
+
+  fs.writeFileSync(`${__dirname}/db/db.json`, JSON.stringify(savedNotes));
+  res.json(savedNotes);
 })
 
 app.delete('/api/notes', (req,res) => {
